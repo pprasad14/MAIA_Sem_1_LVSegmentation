@@ -5,15 +5,21 @@ a2 = niftiread('patient002_frame01.nii.gz');
 a_uint8 = uint8(a);
 a2_uint8 = uint8(a2);
 
-imshow(a_uint8(:,:,5))
-figure 
-imshow(a_uint8(:,:,3))
+% figure
+% imshow(a_uint8(:,:,5))
+% figure 
+% imshow(a_uint8(:,:,3))
 
 
 %% Displaying all the 10 slices individually
 for i = 1:10
     figure
 imshow(a(:,:,i),[])
+pause(0.5)
+end
+
+for i = 1:10
+imshow(a2_uint8(:,:,i),[])
 pause(0.5)
 end
 
@@ -27,14 +33,13 @@ for i = 1:10
 end
 
 for i = 1:10
-    subplot(2,5,i), imshow(a2_uint8(:,:,i),[]);
-    
+    subplot(2,5,i), imshow(a2_uint8(:,:,i),[]); 
 end
 
-for i = 1:10
-    mark = insertMarker(a2_uint8(:,:,i), [lv_center_x lv_center_y ],'o','color', 'green', 'size',5);
-    subplot(2,5,i),imshow(mark);
-end
+% for i = 1:10
+%     mark = insertMarker(a2_uint8(:,:,i), [lv_center_x lv_center_y ],'o','color', 'green', 'size',5);
+%     subplot(2,5,i),imshow(mark);
+% end
 
 
 %% Find region of left ventricle to reduce the computation
@@ -68,66 +73,93 @@ end
 % cropped = imcrop(slice, [lv_center_x - 1.5*window_x  lv_center_y - 1.5*window_y  window_x*2.5  window_y*2.5] );
 cropped = imcrop(slice, [lv_center_x - window_x  lv_center_y - window_y  window_x*2  window_y*2] );
 figure
-imshow(cropped),title('Cropped Image');
+subplot(1,2,1), imshow(mark), title('LV center marker');
 mark = insertMarker(slice, [lv_center_x lv_center_y ]);
-figure
-imshow(mark), title('LV center marker');
+subplot(1,2,2), imshow(cropped),title('Cropped Image');
 
 %% Applying Image Smoothening
 for i = 1:4
     cropped_smooth = imgaussfilt(cropped,i);
     subplot(2,2,i),
-    imshow(cropped_smooth);
+    imshow(cropped_smooth), title(strcat('Gausian Filter: k =  ', string(i)));
 end
 
 %% Applying multiple threshold levels in cropped image
 
 % 4 Theshold levels
-cropped_copy_thresh_ = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
-for i = 1:size(cropped_copy,1)
-    for j = 1: size(cropped_copy,2)
+cropped_copy_thresh_4 = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
+for i = 1:size(cropped_copy_thresh_4,1)
+    for j = 1: size(cropped_copy_thresh_4,2)
         if cropped_smooth(i,j) < 50
-            cropped_copy(i,j) = 0;
+            cropped_copy_thresh_4(i,j) = 0;
         elseif cropped_smooth(i,j) < 125
-            cropped_copy(i,j) = 75;
+            cropped_copy_thresh_4(i,j) = 75;
         elseif cropped_smooth(i,j) < 200
-            cropped_copy(i,j) = 150;
+            cropped_copy_thresh_4(i,j) = 150;
         else
-            cropped_copy(i,j) = 255;
+            cropped_copy_thresh_4(i,j) = 255;
         end
     end
 end
-subplot(1,2,1), imshow(cropped_copy), title('4 Threshold levels of Cropped Image');
 
 % 3 Threshold levels
-cropped_copy = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
-for i = 1:size(cropped_copy,1)
-    for j = 1: size(cropped_copy,2)
+cropped_copy_thresh_3 = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
+for i = 1:size(cropped_copy_thresh_3,1)
+    for j = 1: size(cropped_copy_thresh_4,2)
         if cropped_smooth(i,j) < 50
-            cropped_copy(i,j) = 0;
+            cropped_copy_thresh_3(i,j) = 0;
         elseif cropped_smooth(i,j) < 150
-            cropped_copy(i,j) = 100;
+            cropped_copy_thresh_3(i,j) = 100;
         else
-            cropped_copy(i,j) = 200;
+            cropped_copy_thresh_3(i,j) = 200;
         end
     end
 end
-
-subplot(1,2,2), imshow(cropped_copy), title('3 Threshold levels of Cropped Image');
+figure
+subplot(2,2,1), imshow(cropped), title('Cropped');
+subplot(2,2,2), imshow(cropped_smooth), title('Cropped Smooth');
+subplot(2,2,3), imshow(cropped_copy_thresh_3), title('3 Threshold levels');
+subplot(2,2,4), imshow(cropped_copy_thresh_4), title('4 Threshold levels');
 
 %% 
 
-ed = edge(cropped_copy,'Canny');
+ed_thresh3 = edge(cropped_copy_thresh_3,'Canny');
+ed_thresh4 = edge(cropped_copy_thresh_4,'Canny');
 
-subplot(1,2,1), imshow(cropped_copy);
-subplot(1,2,2), imshow(ed);
+figure
+subplot(2,2,1), imshow(cropped_copy_thresh_3), title('3 Threshold Levels');
+subplot(2,2,2), imshow(ed_thresh3), title('Edges of 3 Threshold Levels');
+subplot(2,2,3), imshow(cropped_copy_thresh_4), title('4 Threshold Levels');
+subplot(2,2,4), imshow(ed_thresh4), title('Edges of 4 Threshold Levels');
             
+%% Finding Areas of different Objects and later remove ones with smaller area(<100 pixels)
+
+area_thresh_3 = bwareaopen(ed_thresh3,100);
+area_thresh_4 = bwareaopen(ed_thresh4,100);
+
+figure
+subplot(2,2,1), imshow(cropped_copy_thresh_3), title('3 Threshold Levels');
+subplot(2,2,2), imshow(area_thresh_3), title('3 Threshold Levels');
+subplot(2,2,3), imshow(cropped_copy_thresh_4), title('4 Threshold Levels');
+subplot(2,2,4), imshow(area_thresh_4), title('4 Threshold Levels');
+
+%% Overlapping Original Image with the bordered images
+ 
+%Inner wall:
+subplot(1,2,1);
+imshow(area_thresh_4);
+redAndBlueChannel = 255 * uint8(area_thresh_4);
+greenChannel = 255 * zeros(size(area_thresh_4), 'uint8'); % Green Everywhere.
+rgbImage_inner_outer = cat(3, redAndBlueChannel, greenChannel, redAndBlueChannel);
+subplot(1,2,2);
+imshow(rgbImage_inner_outer);            
             
-            
-            
-            
-            
-            
+cropped_c = cropped;
+cropped_c = cat(3,cropped_c,cropped_c,cropped_c);            
+imshow(cropped_c);
+
+joined = rgbImage_inner_outer + 
+
             
             
             

@@ -46,7 +46,7 @@ end
 % using window size ( 60 , 60 ) and finding point around which maximum sum is
 % found
 
-slice = a_uint8(:,:,5);
+slice = a2_uint8(:,:,5);
 
 window_x = 40;
 window_y = 40;
@@ -132,17 +132,39 @@ subplot(2,2,2), imshow(ed_thresh3), title('Edges of 3 Threshold Levels');
 subplot(2,2,3), imshow(cropped_copy_thresh_4), title('4 Threshold Levels');
 subplot(2,2,4), imshow(ed_thresh4), title('Edges of 4 Threshold Levels');
             
-%% Finding Areas of different Objects and later remove ones with smaller area
+%% Finding Areas of different Objects and later remove ones with smaller area(<100 pixels)
 
 area_thresh_3 = bwareaopen(ed_thresh3,100);
 area_thresh_4 = bwareaopen(ed_thresh4,100);
 
+figure
+subplot(2,2,1), imshow(cropped_copy_thresh_3), title('3 Threshold Levels');
+subplot(2,2,2), imshow(area_thresh_3), title('3 Threshold Levels');
+subplot(2,2,3), imshow(cropped_copy_thresh_4), title('4 Threshold Levels');
+subplot(2,2,4), imshow(area_thresh_4), title('4 Threshold Levels');
+
+%% Overlapping Original Image with the bordered images
+ 
+%Inner wall:
+subplot(1,3,1);
+imshow(cropped);
+subplot(1,3,2);
+imshow(area_thresh_4);
+redAndBlueChannel = 255 * uint8(area_thresh_4);
+greenChannel = 255 * zeros(size(area_thresh_4), 'uint8'); % Green Everywhere.
+rgbImage_inner_outer = cat(3, redAndBlueChannel, greenChannel, redAndBlueChannel);
+subplot(1,3,3);
+imshow(rgbImage_inner_outer);            
             
-            
-            
-            
-            
-            
+cropped_c = cropped;
+cropped_c = cat(3,cropped_c,cropped_c,cropped_c);            
+imshow(cropped_c);
+
+joined = rgbImage_inner_outer + cropped_c;
+imshow(joined)
+
+subplot(1,2,1), imshow(cropped)
+subplot(1,2,2), imshow(rgbImage_inner_outer);
             
             
             
