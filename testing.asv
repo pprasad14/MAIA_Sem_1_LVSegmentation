@@ -25,13 +25,14 @@ end
 for i = 1:10
     subplot(2,5,i), imshow(a_uint8(:,:,i),[])
 end
+
 for i = 1:10
     subplot(2,5,i), imshow(a2_uint8(:,:,i),[]);
     
 end
+
 for i = 1:10
-    mark = insertMarker(a2_uint8(:,:,i), [lv_center_x lv_center_y ],'x','color', 'red''size',10);
-    
+    mark = insertMarker(a2_uint8(:,:,i), [lv_center_x lv_center_y ],'o','color', 'green', 'size',5);
     subplot(2,5,i),imshow(mark);
 end
 
@@ -40,7 +41,7 @@ end
 % using window size ( 60 , 60 ) and finding point around which maximum sum is
 % found
 
-slice2 = a2_uint8(:,:,5);
+slice = a_uint8(:,:,5);
 
 window_x = 40;
 window_y = 40;
@@ -51,10 +52,10 @@ max_sum = 0;
 iter = 0;
 % kernel = ones(60);
 
-for i = window_y + 1 : size(slice2,1) - window_y - 2
-    for j = window_x + 1 : size(slice2,2) - window_x - 2
+for i = window_y + 1 : size(slice,1) - window_y - 2
+    for j = window_x + 1 : size(slice,2) - window_x - 2
         %60,60 window to find the sum
-        temp_matrix = slice2(i - window_y/2 : i + window_y/2 - 1 , j - window_x/2 : j + window_x/2 - 1);
+        temp_matrix = slice(i - window_y/2 : i + window_y/2 - 1 , j - window_x/2 : j + window_x/2 - 1);
         if sum(sum(temp_matrix)) > max_sum
             max_sum = sum(sum(temp_matrix));
             lv_center_x = j;
@@ -64,17 +65,72 @@ for i = window_y + 1 : size(slice2,1) - window_y - 2
     iter = iter + 1;
 end
 
-cropped = imcrop(slice2, [lv_center_x - window_x  lv_center_y - window_y  window_x*2  window_y*2] );
+% cropped = imcrop(slice, [lv_center_x - 1.5*window_x  lv_center_y - 1.5*window_y  window_x*2.5  window_y*2.5] );
+cropped = imcrop(slice, [lv_center_x - window_x  lv_center_y - window_y  window_x*2  window_y*2] );
 figure
-imshow(cropped);
-mark = insertMarker(slice2, [lv_center_x lv_center_y ]);
+imshow(cropped),title('Cropped Image');
+mark = insertMarker(slice, [lv_center_x lv_center_y ]);
 figure
-imshow(mark);
+imshow(mark), title('LV center marker');
 
-% 
-% %sample image:
-% im = a(:,:,5);
-% ed = edge(im,'Canny');
-% 
-% subplot(1,2,1), imshow(im,[]);
-% subplot(1,2,2), imshow(ed);
+%% Applying Image Smoothening
+for i = 1:4
+    cropped_smooth = imgaussfilt(cropped,i);
+    subplot(2,2,i),
+    imshow(cropped_smooth);
+end
+
+%% Applying multiple threshold levels in cropped image
+
+% 4 Theshold levels
+cropped_copy_thresh_ = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
+for i = 1:size(cropped_copy,1)
+    for j = 1: size(cropped_copy,2)
+        if cropped_smooth(i,j) < 50
+            cropped_copy(i,j) = 0;
+        elseif cropped_smooth(i,j) < 125
+            cropped_copy(i,j) = 75;
+        elseif cropped_smooth(i,j) < 200
+            cropped_copy(i,j) = 150;
+        else
+            cropped_copy(i,j) = 255;
+        end
+    end
+end
+subplot(1,2,1), imshow(cropped_copy), title('4 Threshold levels of Cropped Image');
+
+% 3 Threshold levels
+cropped_copy = uint8(zeros(size(cropped_smooth,1),size(cropped_smooth,2)));
+for i = 1:size(cropped_copy,1)
+    for j = 1: size(cropped_copy,2)
+        if cropped_smooth(i,j) < 50
+            cropped_copy(i,j) = 0;
+        elseif cropped_smooth(i,j) < 150
+            cropped_copy(i,j) = 100;
+        else
+            cropped_copy(i,j) = 200;
+        end
+    end
+end
+
+subplot(1,2,2), imshow(cropped_copy), title('3 Threshold levels of Cropped Image');
+
+%% 
+
+ed = edge(cropped_copy,'Canny');
+
+subplot(1,2,1), imshow(cropped_copy);
+subplot(1,2,2), imshow(ed);
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
