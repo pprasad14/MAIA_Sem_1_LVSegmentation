@@ -23,6 +23,7 @@ for i = 1:10
 end
 
 %% Displaying all 10 slices on single image
+figure
 for i = 1:10
     subplot(2,5,i), imshow(a(:,:,i),[])
 end
@@ -46,7 +47,7 @@ end
 % using window size ( 60 , 60 ) and finding point around which maximum sum is
 % found
 
-slice = a_uint8(:,:,5);
+slice = a_uint8(:,:,6);
 
 window_x = 40;
 window_y = 40;
@@ -77,13 +78,9 @@ mark = insertMarker(slice, [lv_center_x lv_center_y ]);
 figure
 subplot(1,2,1), imshow(mark), title('LV center marker');
 subplot(1,2,2), imshow(cropped),title('Cropped Image');
-
-%% Applying Image Smoothening
-for i = 1:4
-    cropped_smooth = imgaussfilt(cropped,i);
-    subplot(2,2,i),
-    imshow(cropped_smooth), title(strcat('Gausian Filter: k =  ', string(i)));
-end
+% 
+% boxKernel = ones(10,10); % Or whatever size window you want.
+% cropped_smooth = uint8(conv2(cropped, boxKernel, 'full'));
 
 cropped_smooth = imgaussfilt(cropped,5);
 
@@ -95,9 +92,9 @@ for i = 1:size(cropped_copy_thresh_4,1)
     for j = 1: size(cropped_copy_thresh_4,2)
         if cropped_smooth(i,j) < 50
             cropped_copy_thresh_4(i,j) = 0;
-        elseif cropped_smooth(i,j) < 90
+        elseif cropped_smooth(i,j) < 125
             cropped_copy_thresh_4(i,j) = 100;
-        elseif cropped_smooth(i,j) < 170
+        elseif cropped_smooth(i,j) < 200
             cropped_copy_thresh_4(i,j) = 150;
         else
             cropped_copy_thresh_4(i,j) = 255;
@@ -124,7 +121,7 @@ subplot(2,2,2), imshow(cropped_smooth), title('Cropped Smooth');
 subplot(2,2,3), imshow(cropped_copy_thresh_3), title('3 Threshold levels');
 subplot(2,2,4), imshow(cropped_copy_thresh_4), title('4 Threshold levels');
 
-%% Applying Canny Edge detection
+%% 
 
 ed_thresh3 = edge(cropped_copy_thresh_3,'Canny');
 ed_thresh4 = edge(cropped_copy_thresh_4,'Canny');
@@ -149,6 +146,7 @@ subplot(2,2,4), imshow(area_thresh_4), title('4 Threshold Levels');
 %% Overlapping Original Image with the bordered images
  
 %Inner wall:
+figure
 subplot(1,3,1);
 imshow(cropped);
 subplot(1,3,2);
