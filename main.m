@@ -35,13 +35,56 @@ for k = 3:6
     cropped = imcrop(slice, [lv_center_x - window_x  lv_center_y - window_y  window_x*2  window_y*2] );
     mark = insertMarker(slice, [lv_center_x lv_center_y ]);
 
-    % figure
-    % subplot(1,2,1), imshow(mark), title('LV center marker');
-    % subplot(1,2,2), imshow(cropped),title('Cropped Image');
+    figure
+    subplot(1,2,1), imshow(mark), title('LV center marker');
+    subplot(1,2,2), imshow(cropped),title('Cropped Image');
+
+%% Gradient
+
+[Gmag, Gdir] = imgradient(cropped,'prewitt');
+figure
+imshow(Gmag, []);
+
+Gmag_edge = edge(Gmag,'Canny');
+figure
+imshow(Gmag_edge);
+
+% [Gx,Gy] = imgradientxy(cropped);
+% imshowpair(Gx,Gy,'montage')
+% title('Directional Gradients Gx and Gy, Using Sobel Method')
+
+
+%% Otsu's thresholding:
+
+% [counts,x] = imhist(cropped,16);
+% stem(x,counts);
+% T = otsuthresh(counts);
+% BW = imbinarize(cropped,T);
+% figure
+% imshow(BW)
+
+%% Laplce Filtering
+% 
+% sigma = 1.5;
+% alpha = 1.5;
+% 
+% img_laplace = locallapfilt(cropped, sigma, alpha);
+% figure
+% subplot(1,2,1), imshow(cropped), title('Original');
+% subplot(1,2,2),imshow(img_laplace), title('Laplacian');
+%     
 
 
     %% Applying Image Smoothening
-    cropped_smooth = imgaussfilt(cropped,5);
+    cropped_smooth = imgaussfilt(cropped,2);
+    figure
+    imshow(cropped_smooth), title('Gaussian');
+    
+    [Gmag_gauss, Gdir_gauss] = imgradient(cropped_smooth,'prewitt');
+    figure
+    imshow(Gmag_gauss, []);
+    
+    cropped_smooth = Gmag_gauss;
 
 
     %% Applying multiple threshold levels in cropped image
@@ -74,11 +117,24 @@ for k = 3:6
             end
         end
     end
-    % figure
-    % subplot(2,2,1), imshow(cropped), title('Cropped');
-    % subplot(2,2,2), imshow(cropped_smooth), title('Cropped Smooth');
-    % subplot(2,2,3), imshow(cropped_copy_thresh_3), title('3 Threshold levels');
-    % subplot(2,2,4), imshow(cropped_copy_thresh_4), title('4 Threshold levels');
+    
+    cropped_copy_thresh_4_area = bwareaopen(cropped_copy_thresh_4,1950);
+
+    
+    
+    figure
+    subplot(2,2,1), imshow(cropped), title('Cropped');
+    subplot(2,2,2), imshow(cropped_smooth,[]), title('Cropped Smooth');
+    subplot(2,2,3), imshow(cropped_copy_thresh_3), title('3 Threshold levels');
+    subplot(2,2,4), imshow(cropped_copy_thresh_4_area), title('4 Threshold levels');
+    
+    SE = strel('disk',50);
+    cropped_copy_thresh_4_area_open = imopen(cropped_copy_thresh_4_area, SE);  
+    imshow(cropped_copy_thresh_4_area_open);
+    
+%     cc = bwconncomp(cropped_copy_thresh_4_area);
+
+    
 
     %% Applying Canny Edge detection
 

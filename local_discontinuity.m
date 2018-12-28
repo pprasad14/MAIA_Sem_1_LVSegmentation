@@ -5,7 +5,8 @@ a = niftiread('patient001_frame01.nii.gz');
 imshow(a(:,:,5),[])
 
 %% storing slice
-slice = a(:,:,5);
+% slice = a(:,:,5);
+slice = cropped;
 smooth_slice = zeros(size(slice,1), size(slice,2), 'int16');
 
 for i = 2 : size(slice,1)-1

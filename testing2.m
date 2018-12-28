@@ -5,10 +5,10 @@ a2 = niftiread('patient002_frame01.nii.gz');
 a_uint8 = uint8(a);
 a2_uint8 = uint8(a2);
 
-% figure
-% imshow(a_uint8(:,:,5))
-% figure 
-% imshow(a_uint8(:,:,3))
+figure
+imshow(a_uint8(:,:,5))
+figure 
+imshow(a_uint8(:,:,3))
 
 
 %% Displaying all the 10 slices individually
@@ -44,10 +44,10 @@ end
 
 
 %% Find region of left ventricle to reduce the computation
-% using window size ( 60 , 60 ) and finding point around which maximum sum is
+% using window size ( 40 , 40 ) and finding point around which maximum sum is
 % found
 
-slice = a_uint8(:,:,6);
+slice = a_uint8(:,:,3);
 
 window_x = 40;
 window_y = 40;
@@ -83,6 +83,7 @@ subplot(1,2,2), imshow(cropped),title('Cropped Image');
 % cropped_smooth = uint8(conv2(cropped, boxKernel, 'full'));
 
 cropped_smooth = imgaussfilt(cropped,5);
+imshow(cropped_smooth);
 
 %% Applying multiple threshold levels in cropped image
 
@@ -120,7 +121,7 @@ subplot(2,2,1), imshow(cropped), title('Cropped');
 subplot(2,2,2), imshow(cropped_smooth), title('Cropped Smooth');
 subplot(2,2,3), imshow(cropped_copy_thresh_3), title('3 Threshold levels');
 subplot(2,2,4), imshow(cropped_copy_thresh_4), title('4 Threshold levels');
-
+imshow();
 %% 
 
 ed_thresh3 = edge(cropped_copy_thresh_3,'Canny');
