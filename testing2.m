@@ -29,8 +29,8 @@ for i = 1:10
 end
 
 %note: more contrast when compared to above display
-for i = 1:10
-    subplot(2,5,i), imshow(a_uint8(:,:,i),[])
+for i = 2:9
+    subplot(2,4,i-1), imshow(a_uint8(:,:,i),[])
 end
 
 for i = 1:10

@@ -1,8 +1,8 @@
 %% Reading the time lapsed slices
-a = niftiread('patient001_frame01.nii.gz');
+a = niftiread('patient013_frame01.nii.gz');
 a_uint8 = uint8(a);
-
-for k = 3:6
+a_uint8 = a;
+for k = 4:5
     % selecting slice
     slice = a_uint8(:,:,k);
 
@@ -36,8 +36,8 @@ for k = 3:6
     mark = insertMarker(slice, [lv_center_x lv_center_y ]);
 
     figure
-    subplot(1,2,1), imshow(mark), title('LV center marker');
-    subplot(1,2,2), imshow(cropped),title('Cropped Image');
+    subplot(1,2,1), imshow(slice), title('LV center marker');
+%     subplot(1,2,2), imshow(cropped),title('Cropped Image');
 
 %% Gradient
 

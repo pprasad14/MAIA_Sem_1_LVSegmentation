@@ -15,8 +15,8 @@ function [SegoutRGB] = get_inner_wall(I)
 %     subplot(1,2,2), imshow(BWs), title('Binary Gradient Mask');
 
     %% making our structuring elements
-    se90 = strel('line', 3, 90); % for vertical line structuring element
-    se0 = strel('line', 3, 0); % for horizontal line structuring element
+    se90 = strel('line', 2, 90); % for vertical line structuring element
+    se0 = strel('line', 2, 0); % for horizontal line structuring element
 
     %% dialating the image
     BWsdil = imdilate(BWs, [se90 se0]);
@@ -41,7 +41,7 @@ function [SegoutRGB] = get_inner_wall(I)
 %     subplot(1,2,2), imshow(BWnobord), title('cleared border image');
 % 
 
-    % BWnobord = BWdfill;
+%     BWnobord = BWdfill;
     %% structuring element diamond
     seD = strel('diamond',1);
     BWfinal = imerode(BWnobord,seD);
@@ -53,7 +53,7 @@ function [SegoutRGB] = get_inner_wall(I)
 
 %% remove small objects
 
-    BWfinal_no_small = bwareaopen(BWfinal, 50);
+    BWfinal_no_small = bwareaopen(BWfinal, 100);
 %     figure, imshow(BWfinal_no_small), title('segmented image');
     
 %     subplot(1,2,1), imshow(BWfinal), title('with small objects');

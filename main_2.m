@@ -2,12 +2,13 @@
 a = niftiread('patient001_frame01.nii.gz');
 a_uint8 = uint8(a);
 
-a2 = niftiread('patient002_frame01.nii.gz');
+a2 = niftiread('patient004_frame01.nii.gz');
 a2_uint8 = uint8(a2);
 
-a3 = niftiread('patient003_frame01.nii.gz');
+a3 = niftiread('patient012_frame01.nii.gz');
 a3_uint8 = uint8(a3);
 
+a_uint8 = a;
 a_uint8 = a2_uint8;
 a_uint8 = a3_uint8;
 
