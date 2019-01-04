@@ -33,13 +33,18 @@ function [SegoutRGB] = get_inner_wall(I)
 %     subplot(1,2,1), imshow(BWsdil), title('dilated gradient mask');
 %     subplot(1,2,2), imshow(BWdfill), title('binary image with filled holes');
     
+ %% structuring element diamond
+    seD = strel('diamond',1);
+    BW_temp = imerode(BWdfill,seD);
+    BW_temp = imerode(BW_temp,seD);
+    
     %% remove objects touching the border
-    BWnobord = imclearborder(BWdfill, 4);
+    BWnobord = imclearborder(BW_temp, 4);
 %     figure, imshow(BWnobord), title('cleared border image');
-%     
+    
 %     subplot(1,2,1), imshow(BWdfill), title('binary image with filled holes');
 %     subplot(1,2,2), imshow(BWnobord), title('cleared border image');
-% 
+
 
 %     BWnobord = BWdfill;
     %% structuring element diamond
@@ -53,15 +58,19 @@ function [SegoutRGB] = get_inner_wall(I)
 
 %% remove small objects
 
-    BWfinal_no_small = bwareaopen(BWfinal, 100);
+    BWfinal_no_small = bwareaopen(BWfinal, 700);
 %     figure, imshow(BWfinal_no_small), title('segmented image');
     
 %     subplot(1,2,1), imshow(BWfinal), title('with small objects');
 %     subplot(1,2,2), imshow(BWfinal_no_small), title('with no small objects');
 
+%% dilating again
+
+    BWsdil = imdilate(BWfinal_no_small, [se90 se0]);
+
 
 %% Overlapping inner wall with original image
-    BWoutline = bwperim(BWfinal_no_small);
+    BWoutline = bwperim(BWsdil);
     SegoutR = I;
     SegoutG = I;
     SegoutB = I;
