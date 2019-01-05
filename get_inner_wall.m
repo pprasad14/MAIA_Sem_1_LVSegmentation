@@ -1,4 +1,4 @@
-function [SegoutRGB] = get_inner_wall(I)
+function [SegoutRGB,BWsdil] = get_inner_wall(I)
 % link: https://www.mathworks.com/help/images/detecting-a-cell-using-image-segmentation.html
 
 % Given a cropped gray image of the LV, returns the outline of inner wall
@@ -27,8 +27,8 @@ function [SegoutRGB] = get_inner_wall(I)
     
 %% fill holes in image
     BWdfill = imfill(BWsdil, 'holes');
-%     figure, imshow(BWdfill);
-%     title('binary image with filled holes');
+%     figure, imshow(BWdfill); title('binary image with filled holes');
+%     
 % 
 %     subplot(1,2,1), imshow(BWsdil), title('dilated gradient mask');
 %     subplot(1,2,2), imshow(BWdfill), title('binary image with filled holes');
@@ -58,7 +58,7 @@ function [SegoutRGB] = get_inner_wall(I)
 
 %% remove small objects
 
-    BWfinal_no_small = bwareaopen(BWfinal, 700);
+    BWfinal_no_small = bwareaopen(BWfinal, 200);
 %     figure, imshow(BWfinal_no_small), title('segmented image');
     
 %     subplot(1,2,1), imshow(BWfinal), title('with small objects');
@@ -67,10 +67,17 @@ function [SegoutRGB] = get_inner_wall(I)
 %% dilating again
 
     BWsdil = imdilate(BWfinal_no_small, [se90 se0]);
+    BWsdil = imdilate(BWsdil, [se90 se0]);
+
 
 
 %% Overlapping inner wall with original image
     BWoutline = bwperim(BWsdil);
+    
+    se = strel('line',3,1);
+    BWoutline = imdilate(BWoutline,se);
+%     figure,imshow(BWoutline)
+    
     SegoutR = I;
     SegoutG = I;
     SegoutB = I;
